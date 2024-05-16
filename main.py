@@ -1,10 +1,14 @@
 import subprocess
-from evdev import InputDevice, categorize, ecodes
+from evdev import InputDevice, categorize, ecodes, list_devices
 from Xlib import X, display
 
-# Set up the event device
-event_device_path = "/dev/input/event28"  # Update to your device path
-device = InputDevice(event_device_path)
+def find_device_by_name(device_name):
+    """Search for and return an input device by its name."""
+    for device_path in list_devices():
+        device = InputDevice(device_path)
+        if device_name in device.name:
+            return device
+    raise ValueError(f"No device found with name {device_name}")
 
 # Set up display for window management
 disp = display.Display()
@@ -21,6 +25,14 @@ def activate_window(window):
     window.set_input_focus(X.RevertToParent, X.CurrentTime)
     window.configure(stack_mode=X.Above)
 
+# Initialize the device by name
+device_name = "Melfas LGDisplay Incell Touch"
+try:
+    device = find_device_by_name(device_name)
+except ValueError as e:
+    print(e)
+    exit(1)
+
 # Main loop
 last_focused_window = None
 last_focused_window_name = None
@@ -34,12 +46,13 @@ try:
                 # On touch start
                 last_focused_window, last_focused_window_name, last_focused_window_class = get_active_window()
                 print(f"Touch started, last focused window: {last_focused_window_name} [{last_focused_window_class}]")
+                # Optionally, activate the window right when touch starts
                 activate_window(last_focused_window)
             elif key_event.keystate == key_event.key_up:
                 # On touch end
                 current_window, current_window_name, current_window_class = get_active_window()
                 print(f"Touch ended, current window: {current_window_name} [{current_window_class}]")
-                if "Google Chrome" in current_window_class:
+                if "Google Chrome" in str(current_window_class):
                     print(f"Touch on Chrome detected, refocusing last window: {last_focused_window_name} [{last_focused_window_class}]")
                     activate_window(last_focused_window)
 except KeyboardInterrupt:
