@@ -1,6 +1,12 @@
 import subprocess
 from evdev import InputDevice, categorize, ecodes, list_devices
 from Xlib import X, display
+import os
+
+# Save the current process ID to a file
+pid_file = '/tmp/revert_focus_pid'
+with open(pid_file, 'w') as f:
+    f.write(str(os.getpid()))
 
 def find_device_by_name(device_name):
     """Search for and return an input device by its name."""
@@ -52,9 +58,8 @@ try:
                 # On touch end
                 current_window, current_window_name, current_window_class = get_active_window()
                 print(f"Touch ended, current window: {current_window_name} [{current_window_class}]")
-                if "Google Chrome" in str(current_window_class):
-                    print(f"Touch on Chrome detected, refocusing last window: {last_focused_window_name} [{last_focused_window_class}]")
-                    activate_window(last_focused_window)
+                print(f"Touch on Chrome detected, refocusing last window: {last_focused_window_name} [{last_focused_window_class}]")
+                # activate_window(last_focused_window)
 except KeyboardInterrupt:
     print("Exiting script.")
 
