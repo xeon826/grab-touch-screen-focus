@@ -3,10 +3,6 @@ from evdev import InputDevice, categorize, ecodes, list_devices
 from Xlib import X, display
 import os
 
-# Save the current process ID to a file
-pid_file = '/tmp/revert_focus_pid'
-with open(pid_file, 'w') as f:
-    f.write(str(os.getpid()))
 
 def find_device_by_name(device_name):
     """Search for and return an input device by its name."""
